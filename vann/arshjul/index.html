@@ -30,6 +30,8 @@ img{max-width:100%}
   --wedge:rgba(248,230,198,.55); --sel:rgba(216,45,32,.09);
   --shadow:0 18px 50px rgba(60,40,10,.18);
   --font:"ABC Social","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --bk-ok-bg:#E1EFD9; --bk-ok-fg:#2E5A37; --bk-ok-line:#8DB894;
+  --bk-no-bg:#FFE1DD; --bk-no-fg:#B3261E; --bk-no-line:#F29D93;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#1A1814; --surface:#23201B; --surface-2:#2D2922; --fg:#F4EDE1; --muted:#B4A893; --line:#37322A; --line-strong:#4E473B;
@@ -41,6 +43,8 @@ img{max-width:100%}
   --water-cold:#3D6584; --water-warm:#8A6B2A; --cold-tint:rgba(133,185,224,.07);
   --wedge:rgba(255,255,255,.035); --sel:rgba(255,107,93,.13);
   --shadow:0 18px 50px rgba(0,0,0,.5);
+  --bk-ok-bg:#20372A; --bk-ok-fg:#9FD3A8; --bk-ok-line:#3F6A4A;
+  --bk-no-bg:#4A2420; --bk-no-fg:#FF8F84; --bk-no-line:#7A3A33;
   color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#1A1814; --surface:#23201B; --surface-2:#2D2922; --fg:#F4EDE1; --muted:#B4A893; --line:#37322A; --line-strong:#4E473B;
@@ -52,6 +56,8 @@ img{max-width:100%}
   --water-cold:#3D6584; --water-warm:#8A6B2A; --cold-tint:rgba(133,185,224,.07);
   --wedge:rgba(255,255,255,.035); --sel:rgba(255,107,93,.13);
   --shadow:0 18px 50px rgba(0,0,0,.5);
+  --bk-ok-bg:#20372A; --bk-ok-fg:#9FD3A8; --bk-ok-line:#3F6A4A;
+  --bk-no-bg:#4A2420; --bk-no-fg:#FF8F84; --bk-no-line:#7A3A33;
   color-scheme:dark}
 
 *{box-sizing:border-box}
@@ -166,6 +172,18 @@ h1 .yr{color:var(--accent)}
 .pill.st-klar{background:var(--fg);color:var(--bg);border-color:var(--fg)}
 .pill.st-avklares{background:var(--surface-2);border-color:var(--line-strong)}
 .pill.st-ide{border-style:dashed;color:var(--muted)}
+/* Booking av hytte: grønn = booket, rød = mangler, grå = ikke relevant */
+.pill.bk-booket{background:var(--bk-ok-bg);color:var(--bk-ok-fg);border-color:var(--bk-ok-line)}
+.pill.bk-mangler{background:var(--bk-no-bg);color:var(--bk-no-fg);border-color:var(--bk-no-line)}
+.pill.bk-ikke{background:transparent;color:var(--muted);border-color:var(--line-strong)}
+.pills{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.ltable .pills{align-items:flex-start}
+.bkd{width:10px;height:10px;border-radius:50%;flex:none;border:1.5px solid var(--muted);background:transparent}
+.bkd.bk-booket{background:var(--bk-ok-fg);border-color:var(--bk-ok-fg)}
+.bkd.bk-mangler{background:var(--bk-no-fg);border-color:var(--bk-no-fg)}
+.bar.bk-booket .span::after,.bar.bk-mangler .span::after{content:"";position:absolute;right:-5px;top:-5px;width:10px;height:10px;border-radius:50%;border:2px solid var(--surface)}
+.bar.bk-booket .span::after{background:var(--bk-ok-fg)}
+.bar.bk-mangler .span::after{background:var(--bk-no-fg)}
 .tag{font-size:11px;letter-spacing:.04em;border-radius:5px;padding:1px 6px;background:var(--surface-2);color:var(--muted);white-space:nowrap}
 .tag.al{background:var(--water-cold);color:var(--fg)}
 .tags{display:inline-flex;flex-wrap:wrap;gap:4px;margin-left:6px;vertical-align:1px}
@@ -310,6 +328,7 @@ dialog::backdrop{background:rgba(20,14,6,.45)}
     <div class="filters">
       <div class="chips" id="cat-chips" aria-label="Kategorier"></div>
       <div class="chips" id="st-chips" aria-label="Status"></div>
+      <div class="chips" id="bk-chips" aria-label="Booking"></div>
       <select id="f-ug" class="select" aria-label="Gruppe"><option value="">Alle grupper</option></select>
       <input id="f-q" class="search" type="search" placeholder="Søk i navn, sted, ansvarlige" aria-label="Søk">
       <button type="button" id="f-reset" class="reset" hidden>Nullstill</button>
@@ -334,7 +353,7 @@ dialog::backdrop{background:rgba(20,14,6,.45)}
 
   <section id="view-tidslinje" class="view" aria-labelledby="tab-tidslinje" hidden>
     <div class="gantt-scroll" id="gantt-scroll"><div id="gantt" class="gantt"><p class="loading" style="padding:20px">Henter aktiviteter …</p></div></div>
-    <p class="note">Én rad per gruppe under hver kategori. Aktiviteter som overlapper legges i hver sin etasje. Lyseblå bakgrunn markerer perioden med vann under ca. 15 °C, når kajakkturer krever Aktivitetsleder Hav.</p>
+    <p class="note">Én rad per gruppe under hver kategori. Aktiviteter som overlapper legges i hver sin etasje. Lyseblå bakgrunn markerer perioden med vann under ca. 15 °C, når kajakkturer krever Aktivitetsleder Hav. Grønn prikk betyr at hytta er booket, rød prikk at turen mangler hytte.</p>
   </section>
 
   <section id="view-liste" class="view" aria-labelledby="tab-liste" hidden>
@@ -356,6 +375,9 @@ dialog::backdrop{background:rgba(20,14,6,.45)}
       <label class="fld"><span>Gruppe</span><input id="e-undergruppe" list="ug-list" maxlength="40" autocomplete="off" placeholder="Kajakk, kano, packraft …"></label>
       <fieldset class="fld wide"><legend>Status</legend>
         <div class="seg-opts" id="e-status"></div>
+      </fieldset>
+      <fieldset class="fld wide"><legend>Booking</legend>
+        <div class="seg-opts" id="e-booking"></div>
       </fieldset>
       <fieldset class="when"><legend class="sec">Når</legend>
         <label class="check wide"><input type="checkbox" id="e-usikker"> Datoen er ikke fastsatt ennå</label>
@@ -431,6 +453,9 @@ const CATS=[
 const CAT=Object.fromEntries(CATS.map(c=>[c.id,c]));
 const STATUS=[{id:"klar",navn:"Klar"},{id:"avklares",navn:"Må avklares"},{id:"ide",navn:"Idé"}];
 const ST=Object.fromEntries(STATUS.map(s=>[s.id,s]));
+const BOOKING=[{id:"booket",navn:"Hytte booket"},{id:"mangler",navn:"Mangler hytte"},{id:"ikke",navn:"Ikke relevant"}];
+const BK=Object.fromEntries(BOOKING.map(b=>[b.id,b]));
+const bkPill=it=>'<span class="pill bk-'+it.booking+'">'+esc(BK[it.booking].navn)+'</span>';
 const UG_DEFAULT=["Kajakk","Kano","Packraft","Fridykking","Fjordsvømming","Skøyter","Felles"];
 const MND=["januar","februar","mars","april","mai","juni","juli","august","september","oktober","november","desember"];
 const MND_K=["jan","feb","mar","apr","mai","jun","jul","aug","sep","okt","nov","des"];
@@ -452,7 +477,7 @@ const store={get(k){try{return JSON.parse(localStorage.getItem("arshjul-vann:"+k
 
 const MODUS=window.ARSHJUL_MODUS==="les"?"les":"vanlig";
 const S={raw:new Map(),items:[],loaded:false,online:false,canWrite:false,kode:"",hentet:null,editStamp:"",
-  view:"hjul",month:0,f:{cats:new Set(CATS.map(c=>c.id)),st:new Set(STATUS.map(s=>s.id)),ug:"",q:""},editing:null,busy:false};
+  view:"hjul",month:0,f:{cats:new Set(CATS.map(c=>c.id)),st:new Set(STATUS.map(s=>s.id)),bk:new Set(BOOKING.map(b=>b.id)),ug:"",q:""},editing:null,busy:false};
 
 // restore per-viewer conveniences
 (function(){
@@ -463,10 +488,11 @@ const S={raw:new Map(),items:[],loaded:false,online:false,canWrite:false,kode:""
   if(f&&typeof f==="object"){
     if(Array.isArray(f.cats)&&f.cats.length) S.f.cats=new Set(f.cats.filter(c=>CAT[c]));
     if(Array.isArray(f.st)&&f.st.length) S.f.st=new Set(f.st.filter(s=>ST[s]));
+    if(Array.isArray(f.bk)&&f.bk.length) S.f.bk=new Set(f.bk.filter(b=>BK[b]));
     if(typeof f.ug==="string") S.f.ug=f.ug;
   }
 })();
-function saveFilters(){store.set("filters",{cats:[...S.f.cats],st:[...S.f.st],ug:S.f.ug})}
+function saveFilters(){store.set("filters",{cats:[...S.f.cats],st:[...S.f.st],bk:[...S.f.bk],ug:S.f.ug})}
 
 function norm(id,d){
   if(!d||typeof d!=="object") return null;
@@ -475,7 +501,7 @@ function norm(id,d){
   if(b<0||a>DAYS-1) return null;
   const s=Math.max(0,a), e=Math.min(DAYS-1,b);
   return {id,tittel:String(d.tittel||"Uten navn"),beskrivelse:d.beskrivelse||"",kategori:CAT[d.kategori]?d.kategori:"dagstur",
-    undergruppe:String(d.undergruppe||"").trim()||"Uten gruppe",status:ST[d.status]?d.status:"ide",
+    undergruppe:String(d.undergruppe||"").trim()||"Uten gruppe",status:ST[d.status]?d.status:"ide",booking:BK[d.booking]?d.booking:"ikke",
     datoUsikker:!!d.datoUsikker,datoTekst:d.datoTekst||"",fast:!!d.fast,gjentakelse:d.gjentakelse||"",
     sted:d.sted||"",overnatting:d.overnatting||"",ansvarlige:d.ansvarlige||"",lenke:safeUrl(d.lenke),merknad:d.merknad||"",kilde:d.kilde||"",s,e};
 }
@@ -511,7 +537,7 @@ function tagsHtml(it){
 }
 function visible(){
   const q=S.f.q.trim().toLowerCase();
-  return S.items.filter(it=>S.f.cats.has(it.kategori)&&S.f.st.has(it.status)&&(!S.f.ug||it.undergruppe===S.f.ug)&&
+  return S.items.filter(it=>S.f.cats.has(it.kategori)&&S.f.st.has(it.status)&&S.f.bk.has(it.booking)&&(!S.f.ug||it.undergruppe===S.f.ug)&&
     (!q||[it.tittel,it.sted,it.ansvarlige,it.beskrivelse,it.merknad,it.overnatting,it.undergruppe].join(" ").toLowerCase().includes(q)));
 }
 function packLanes(list,startOf,endOf){
@@ -522,24 +548,27 @@ function packLanes(list,startOf,endOf){
 
 /* ---------- Filters ---------- */
 function renderFilters(){
-  const byCat={},bySt={};
-  for(const it of S.items){byCat[it.kategori]=(byCat[it.kategori]||0)+1;bySt[it.status]=(bySt[it.status]||0)+1}
+  const byCat={},bySt={},byBk={};
+  for(const it of S.items){byCat[it.kategori]=(byCat[it.kategori]||0)+1;bySt[it.status]=(bySt[it.status]||0)+1;byBk[it.booking]=(byBk[it.booking]||0)+1}
   $("#cat-chips").innerHTML=CATS.map(c=>'<button type="button" class="chip c-'+c.id+'" data-cat="'+c.id+'" aria-pressed="'+S.f.cats.has(c.id)+'"><span class="sw"></span>'+esc(c.navn)+' <span class="n">'+(byCat[c.id]||0)+'</span></button>').join("");
   $("#st-chips").innerHTML=STATUS.map(s=>'<button type="button" class="chip st-'+s.id+'" data-st="'+s.id+'" aria-pressed="'+S.f.st.has(s.id)+'"><span class="st"></span>'+esc(s.navn)+' <span class="n">'+(bySt[s.id]||0)+'</span></button>').join("");
+  $("#bk-chips").innerHTML=BOOKING.map(b=>'<button type="button" class="chip" data-bk="'+b.id+'" aria-pressed="'+S.f.bk.has(b.id)+'"><span class="bkd bk-'+b.id+'"></span>'+esc(b.navn)+' <span class="n">'+(byBk[b.id]||0)+'</span></button>').join("");
   const ugs=[...new Set([...UG_DEFAULT,...S.items.map(i=>i.undergruppe)])].sort(ugOrder);
   const present=new Set(S.items.map(i=>i.undergruppe));
   $("#f-ug").innerHTML='<option value="">Alle grupper</option>'+ugs.filter(u=>present.has(u)||u===S.f.ug).map(u=>'<option'+(u===S.f.ug?" selected":"")+'>'+esc(u)+'</option>').join("");
   $("#ug-list").innerHTML=ugs.map(u=>'<option value="'+esc(u)+'">').join("");
-  const active=S.f.cats.size<CATS.length||S.f.st.size<STATUS.length||S.f.ug||S.f.q;
+  const active=S.f.cats.size<CATS.length||S.f.st.size<STATUS.length||S.f.bk.size<BOOKING.length||S.f.ug||S.f.q;
   $("#f-reset").hidden=!active;
 }
 $("#cat-chips").addEventListener("click",e=>{const b=e.target.closest("[data-cat]");if(!b)return;const c=b.dataset.cat;
   if(S.f.cats.has(c)){if(S.f.cats.size>1)S.f.cats.delete(c)}else S.f.cats.add(c);saveFilters();renderAll()});
 $("#st-chips").addEventListener("click",e=>{const b=e.target.closest("[data-st]");if(!b)return;const s=b.dataset.st;
   if(S.f.st.has(s)){if(S.f.st.size>1)S.f.st.delete(s)}else S.f.st.add(s);saveFilters();renderAll()});
+$("#bk-chips").addEventListener("click",e=>{const b=e.target.closest("[data-bk]");if(!b)return;const k=b.dataset.bk;
+  if(S.f.bk.has(k)){if(S.f.bk.size>1)S.f.bk.delete(k)}else S.f.bk.add(k);saveFilters();renderAll()});
 $("#f-ug").addEventListener("change",e=>{S.f.ug=e.target.value;saveFilters();renderAll()});
 let qT;$("#f-q").addEventListener("input",e=>{clearTimeout(qT);qT=setTimeout(()=>{S.f.q=e.target.value;renderAll()},150)});
-$("#f-reset").addEventListener("click",()=>{S.f={cats:new Set(CATS.map(c=>c.id)),st:new Set(STATUS.map(s=>s.id)),ug:"",q:""};$("#f-q").value="";saveFilters();renderAll()});
+$("#f-reset").addEventListener("click",()=>{S.f={cats:new Set(CATS.map(c=>c.id)),st:new Set(STATUS.map(s=>s.id)),bk:new Set(BOOKING.map(b=>b.id)),ug:"",q:""};$("#f-q").value="";saveFilters();renderAll()});
 
 /* ---------- Tabs ---------- */
 function setView(v){
@@ -589,7 +618,7 @@ function renderWheel(list){
       let a0=ang(it.s),a1=ang(it.e+1);const min=0.045;if(a1-a0<min){const mid=(a0+a1)/2;a0=mid-min/2;a1=mid+min/2}
       const rr0=g.r0+it._lane*lt+1,rr1=g.r0+(it._lane+1)*lt-1;
       const inm=it.s<=mEnd(S.month)&&it.e>=mStart(S.month);
-      h+='<path class="arc c-'+it.kategori+' st-'+it.status+(inm?" inmonth":"")+'" data-id="'+esc(it.id)+'" tabindex="0" role="button" aria-label="'+esc(it.tittel+", "+dateLabel(it)+", "+ST[it.status].navn)+'" d="'+sector(rr0,rr1,a0,a1)+'"/>';
+      h+='<path class="arc c-'+it.kategori+' st-'+it.status+(inm?" inmonth":"")+'" data-id="'+esc(it.id)+'" tabindex="0" role="button" aria-label="'+esc(it.tittel+", "+dateLabel(it)+", "+ST[it.status].navn+(it.booking!=="ikke"?", "+BK[it.booking].navn:""))+'" d="'+sector(rr0,rr1,a0,a1)+'"/>';
     }
   }
   // hub
@@ -614,7 +643,7 @@ wheel.addEventListener("click",e=>{
 wheel.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.classList.contains("arc")){e.preventDefault();openEditor(e.target.dataset.id)}});
 function showTip(el,x,y){
   const it=S.items.find(i=>i.id===el.dataset.id);if(!it)return;
-  tip.innerHTML="<b>"+esc(it.tittel)+"</b><span>"+esc(dateLabel(it))+" · "+esc(ST[it.status].navn)+"</span>";
+  tip.innerHTML="<b>"+esc(it.tittel)+"</b><span>"+esc(dateLabel(it))+" · "+esc(ST[it.status].navn)+(it.booking!=="ikke"?" · "+esc(BK[it.booking].navn):"")+"</span>";
   const r=wbox.getBoundingClientRect();
   tip.style.left=Math.min(Math.max(x-r.left,130),r.width-130)+"px";tip.style.top=(y-r.top)+"px";tip.hidden=false;
 }
@@ -631,7 +660,7 @@ function renderMonthPanel(list){
   const its=list.filter(i=>i.s<=b&&i.e>=a).sort(bySE);
   const single=its.filter(i=>!i.fast), fast=its.filter(i=>i.fast);
   $("#month-title").innerHTML=esc(cap(MND[m]))+" <span>"+single.length+(single.length===1?" aktivitet":" aktiviteter")+"</span>";
-  const li=it=>'<li><button type="button" class="mi c-'+it.kategori+'" data-id="'+esc(it.id)+'"><span class="mi-date">'+esc(shortDate(it))+'</span><span><span class="mi-title">'+esc(it.tittel)+tagsHtml(it)+'</span><span class="mi-sub">'+esc(it.datoUsikker&&it.datoTekst?it.datoTekst:"")+(it.datoUsikker&&it.datoTekst&&subLine(it)?" · ":"")+esc(subLine(it))+'</span></span><span class="pill st-'+it.status+'">'+esc(ST[it.status].navn)+'</span></button></li>';
+  const li=it=>'<li><button type="button" class="mi c-'+it.kategori+'" data-id="'+esc(it.id)+'"><span class="mi-date">'+esc(shortDate(it))+'</span><span><span class="mi-title">'+esc(it.tittel)+tagsHtml(it)+'</span><span class="mi-sub">'+esc(it.datoUsikker&&it.datoTekst?it.datoTekst:"")+(it.datoUsikker&&it.datoTekst&&subLine(it)?" · ":"")+esc(subLine(it))+'</span></span><span class="pills"><span class="pill st-'+it.status+'">'+esc(ST[it.status].navn)+'</span>'+(it.booking!=="ikke"?bkPill(it):"")+'</span></button></li>';
   let h="";
   if(!S.loaded) h='<p class="loading">Henter aktiviteter …</p>';
   else if(!single.length&&!fast.length) h='<p class="empty">Ingen aktiviteter i '+MND[m]+' med valgte filtre.</p>';
@@ -679,7 +708,7 @@ function renderGantt(list){
       for(const it of row){
         const lblStyle=it._mode==="in"?'left:0;width:'+it._sw.toFixed(1)+'px':it._mode==="chip"?'left:4px;top:3px;bottom:3px;max-width:'+it._lw.toFixed(1)+'px':'left:'+(it._sw+4).toFixed(1)+'px;max-width:'+it._lw.toFixed(1)+'px';
         const inner=esc(it.tittel);
-        bars+='<button type="button" class="bar c-'+it.kategori+' st-'+it.status+'" data-id="'+esc(it.id)+'" title="'+esc(it.tittel+" · "+dateLabel(it)+" · "+ST[it.status].navn)+'" style="left:'+it._x.toFixed(1)+'px;top:'+(5+it._lane*LANE)+'px;width:'+it._w.toFixed(1)+'px"><span class="span" style="width:'+it._sw.toFixed(1)+'px"></span><span class="lbl'+(it._mode==="in"?" in":it._mode==="chip"?" chip":"")+'" style="'+lblStyle+'">'+inner+'</span></button>';
+        bars+='<button type="button" class="bar c-'+it.kategori+' st-'+it.status+' bk-'+it.booking+'" data-id="'+esc(it.id)+'" title="'+esc(it.tittel+" · "+dateLabel(it)+" · "+ST[it.status].navn+(it.booking!=="ikke"?" · "+BK[it.booking].navn:""))+'" style="left:'+it._x.toFixed(1)+'px;top:'+(5+it._lane*LANE)+'px;width:'+it._w.toFixed(1)+'px"><span class="span" style="width:'+it._sw.toFixed(1)+'px"></span><span class="lbl'+(it._mode==="in"?" in":it._mode==="chip"?" chip":"")+'" style="'+lblStyle+'">'+inner+'</span></button>';
       }
       rows+='<div class="g-row g-ug c-'+c.id+'" style="height:'+(lanes*LANE+8)+'px"><div class="g-label" style="width:'+LW+'px">'+esc(u)+'</div><div class="g-track" style="width:'+TW+'px">'+bars+'</div></div>';
     }
@@ -698,7 +727,7 @@ function renderList(list){
   if(!S.loaded){$("#liste").innerHTML='<p class="loading">Henter aktiviteter …</p>';return}
   const its=list.slice().sort(bySE);
   if(!its.length){$("#liste").innerHTML='<p class="empty">Ingen aktiviteter med valgte filtre.</p>';return}
-  let h='<table class="ltable"><thead><tr><th>Når</th><th>Aktivitet</th><th>Kategori</th><th>Ansvarlige</th><th>Status</th></tr></thead>';
+  let h='<table class="ltable"><thead><tr><th>Når</th><th>Aktivitet</th><th>Kategori</th><th>Ansvarlige</th><th>Status og booking</th></tr></thead>';
   for(let m=0;m<12;m++){
     const mi=its.filter(i=>monthOf(i.s)===m);if(!mi.length)continue;
     h+='<tbody><tr class="mrow"><th colspan="5">'+cap(MND[m])+'<span>'+mi.length+'</span></th></tr>';
@@ -708,7 +737,7 @@ function renderList(list){
         '<td class="t"><button type="button" data-id="'+esc(it.id)+'">'+esc(it.tittel)+'</button>'+tagsHtml(it)+(sub?'<span class="sub">'+esc(sub)+'</span>':"")+(it.lenke?'<a class="ext" href="'+esc(it.lenke)+'" target="_blank" rel="noopener">Åpne påmelding ↗</a>':"")+'</td>'+
         '<td class="k"><span class="dot"></span>'+esc(CAT[it.kategori].navn)+'<small>'+esc(it.undergruppe)+'</small></td>'+
         '<td class="a">'+esc(it.ansvarlige||"Ikke satt")+'</td>'+
-        '<td><span class="pill st-'+it.status+'">'+esc(ST[it.status].navn)+'</span></td></tr>';
+        '<td><span class="pills"><span class="pill st-'+it.status+'">'+esc(ST[it.status].navn)+'</span>'+bkPill(it)+'</span></td></tr>';
     }
     h+='</tbody>';
   }
@@ -730,6 +759,7 @@ let rzT;window.addEventListener("resize",()=>{clearTimeout(rzT);rzT=setTimeout((
 const dlg=$("#editor"), F=id=>$("#e-"+id);
 $("#e-kategori").innerHTML=CATS.map(c=>'<option value="'+c.id+'">'+esc(c.navn)+'</option>').join("");
 $("#e-status").innerHTML=STATUS.map(s=>'<label><input type="radio" name="e-status" value="'+s.id+'" id="e-st-'+s.id+'"> '+esc(s.navn)+'</label>').join("");
+$("#e-booking").innerHTML=BOOKING.map(b=>'<label><input type="radio" name="e-booking" value="'+b.id+'" id="e-bk-'+b.id+'"><span class="bkd bk-'+b.id+'"></span>'+esc(b.navn)+'</label>').join("");
 $("#e-mfra").innerHTML=$("#e-mtil").innerHTML=MND.map((n,i)=>'<option value="'+i+'">'+cap(n)+'</option>').join("");
 function setMonthMode(on){
   for(const el of document.querySelectorAll("[data-exact]")) el.hidden=on;
@@ -761,6 +791,7 @@ async function openEditor(id){
   const it=id?S.items.find(i=>i.id===id):null;
   F("tittel").value=d.tittel||"";F("kategori").value=CAT[d.kategori]?d.kategori:"dagstur";F("undergruppe").value=d.undergruppe||"";
   for(const s of STATUS) $("#e-st-"+s.id).checked=(ST[d.status]?d.status:"ide")===s.id;
+  for(const b of BOOKING) $("#e-bk-"+b.id).checked=(BK[d.booking]?d.booking:"ikke")===b.id;
   F("usikker").checked=!!d.datoUsikker;F("fra").value=d.fra||"";F("til").value=d.til||d.fra||"";
   const a=doy(d.fra),b=doy(d.til);F("mfra").value=a!=null?monthOf(Math.max(0,Math.min(364,a))):S.month;F("mtil").value=b!=null?monthOf(Math.max(0,Math.min(364,b))):F("mfra").value;
   setMonthMode(!!d.datoUsikker);
@@ -799,7 +830,8 @@ function readForm(){
   if(usikker){let m1=+F("mfra").value,m2=+F("mtil").value;if(m2<m1)[m1,m2]=[m2,m1];fra=isoOf(mStart(m1));til=isoOf(mEnd(m2))}
   else{fra=F("fra").value;til=F("til").value||fra}
   const st=(dlg.querySelector('input[name="e-status"]:checked')||{}).value||"ide";
-  return {tittel:F("tittel").value.trim(),kategori:F("kategori").value,undergruppe:F("undergruppe").value.trim(),status:st,
+  const bk=(dlg.querySelector('input[name="e-booking"]:checked')||{}).value||"ikke";
+  return {tittel:F("tittel").value.trim(),kategori:F("kategori").value,undergruppe:F("undergruppe").value.trim(),status:st,booking:bk,
     fra,til,datoUsikker:usikker,datoTekst:F("datotekst").value.trim(),fast:F("fast").checked,gjentakelse:F("fast").checked?F("gjentakelse").value.trim():"",
     sted:F("sted").value.trim(),overnatting:F("overnatting").value.trim(),ansvarlige:F("ansvarlige").value.trim(),
     beskrivelse:F("beskrivelse").value.trim(),lenke:F("lenke").value.trim(),merknad:F("merknad").value.trim(),kilde:F("kilde").value.trim()};
